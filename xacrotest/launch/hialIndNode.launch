@@ -1,0 +1,33 @@
+<launch>
+	<!-- USED FOR ROBOT IDENTIFICATION IN NETWORK SPACE. -->
+	<arg name="RID" />
+	<arg name="xR" />
+	<arg name="yR" />
+	<arg name="orient" />	
+
+	<!-- hardware in a loop related parameter -->
+	<arg name="ROS_MACHINE"/>
+	
+	<arg name="xRn" value="$(eval 5*xR)"/>
+	<arg name="yRn" value="$(eval 5*yR)"/>
+
+	<!-- Didn't create a ros package for this. Use absolute path. -->
+	<param name="robot_description" command="xacro --inorder '/home/tk_khaw/xacrotest/urdf/sbot.urdf.xacro' prefix:=$(arg RID) xR:=$(arg xR) yR:=$(arg yR) orient:=$(arg orient)"/>
+
+	<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model $(arg RID) -param robot_description" />
+
+	<!-- Hardware in a loop setup. Passwordless SSH. Init controller at RPI. -->
+	<!-- You are responsible to ensure simCart is built on RPI, as well as ros_control being available.-->
+	<machine name="$(arg RID)" address="$(arg ROS_MACHINE)" user="pi" env-loader="~/rosinit.sh"/>
+
+	<rosparam file="$(find simCart)/config/controllers.yaml" command="load" />
+	<rosparam file="$(find simCart)/config/ikcon.yaml" command="load" />
+
+	<node machine="$(arg RID)" name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="sbot"
+			args="	controller/state
+				controller/position/Joint1
+				controller/position/Joint2
+			"/> 
+	<node machine="$(arg RID)" name="simCarttest" pkg="simCart" type="simCart" respawn="false" output="screen" args="$(arg RID)" /> 
+	 
+</launch>

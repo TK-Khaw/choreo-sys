@@ -1,0 +1,25 @@
+#This config file contained information for configuration of the communication network topology (under network/)
+#
+#Author: Khaw Teng Kang
+#
+
+network:
+   ROS1:
+      offset: 0
+      neighbors:
+         - ROS2
+         - ROS3
+         - MAIN
+   ROS2:
+      offset: 120
+      neighbors:
+         - ROS1
+         - ROS3
+         - MAIN
+   ROS3:
+      offset: 240
+      neighbors:
+         - ROS1
+         - ROS2
+         - MAIN
+

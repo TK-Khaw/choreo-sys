@@ -1,0 +1,3 @@
+<launch>
+	<node name="simCarttest" pkg="simCart" type="simCart" respawn="false" output="screen" args="ROS2" ns="ROS2" />
+</launch>

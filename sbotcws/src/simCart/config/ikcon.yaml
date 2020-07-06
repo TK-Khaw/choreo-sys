@@ -1,0 +1,24 @@
+#This is configuration file for IK and consensus class object. Use it to alter behavior of IK and concensus class.
+#Author: Khaw Teng Kang.
+#
+#consensus/con_mode = {single=0, double=0, mod-single=0} Consensus mode. Which consensus model to implement. 
+#consensus/loop_hz = loop rate of the IK and concensus control loop. Distinguish this with joint-loop control.
+#consensus/gains = array of gains for the control law of the consensus model. 
+#   for single-integrator/first-order,
+#     >> gains: [<overall gain>]
+#   for double-integrator/second-order,
+#     >> gains: [<overall gain>, <velocity gain>]
+#   for modified first-order consensus,
+#     >> gains: [<overall gain>, <scaling of distribution>, <standard deviation>]  //what more dunno, need after implementation only knows.
+#
+#   for single-integrator, current setting: gains 10. 100Hz
+#   for second-order, current setting: gains [10, 0.01]
+#   for modified first order [10, 50, 1.75] 100Hz
+#traj_tolerance/dist_mode = {joint=0, city-block=1, euclidean=2} Mode for traj deviation computation purposes. 
+#traj_tolerance/dev_tol = deviation tolerance for the actual joint/cartesian point from desired point. 
+
+consensus:
+  con_mode: 2
+  loop_hz: 50
+  gains: [10, 50, 1.75]
+

@@ -1,0 +1,55 @@
+<launch>
+	<!-- special due to not able to read from rosparam in launch file-->
+	<arg name="x_off" default="0.75"/>
+
+	<param name="usm_sim_time" type="bool" value="true" />
+
+	<!-- IP of nodes -->
+	<arg name="ROS1_IP" value="192.168.137.170"/>
+	<arg name="ROS2_IP" value="192.168.137.149"/>
+	<arg name="ROS3_IP" value="192.168.137.87"/>
+	
+	<!--launch file for bringing up of all nodes. -->
+	
+	<rosparam file="/home/tk_khaw/xacrotest/config/network.yaml" command="load" />
+	
+	<!-- all common parameters -->
+	<param name="disk_radius" type="double" value="0.3"/>
+	<param name="inclination_angle" type="double" value="30" />
+	<param name="x_offset" type="double" value="$(arg x_off)" />
+	<param name="y_offset" type="double" value="0.30" />
+
+	
+	<include file="$(find gazebo_ros)/launch/empty_world.launch" />
+
+ 	<!-- Testing hardware-in-a-loop with ROS1 and ROS2. Passwordless SSH-->
+		
+	<include file="/home/tk_khaw/xacrotest/launch/hialIndNode.launch" ns="ROS1">
+		<arg name="RID" value="ROS1"/>
+		<arg name="xR" value="$(eval arg('x_off')*cos(0))"/>
+		<arg name="yR" value="$(eval arg('x_off')*sin(0))"/>
+		<arg name="orient" value="$(eval 3.141592654 + 0)"/>
+		
+		<arg name="ROS_MACHINE" value="$(arg ROS1_IP)"/>
+	</include>
+	
+	<include file="/home/tk_khaw/xacrotest/launch/hialIndNode.launch" ns="ROS2">
+		<arg name="RID" value="ROS2"/>
+		<arg name="xR" value="$(eval arg('x_off')*cos(2.094395102))"/>
+		<arg name="yR" value="$(eval arg('x_off')*sin(2.094395102))"/>
+		<arg name="orient" value="$(eval 3.141592654 + 2.094395102)"/>
+
+		<arg name="ROS_MACHINE" value="$(arg ROS2_IP)"/>
+	</include>
+
+	<!-- ROS3 node is launched on simulation computer. -->
+
+	<include file="/home/tk_khaw/xacrotest/launch/gazIndNode.launch" ns="ROS3">
+		<arg name="RID" value="ROS3"/>
+		<arg name="xR" value="$(eval arg('x_off')*cos(4.188790205))"/>
+		<arg name="yR" value="$(eval arg('x_off')*sin(4.188790205))"/>
+		<arg name="orient" value="$(eval 3.141592654 + 4.188790205)"/>
+	</include> 
+	
+	<node name="cmdCenter" pkg="rqt_gui" type="rqt_gui" respawn="false" output="screen"  />
+</launch>

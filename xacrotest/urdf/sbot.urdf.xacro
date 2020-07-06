@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/macro" name="sbot" >
+
+
+	<gazebo>
+		<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+			<legacyNS>false</legacyNS>
+			<robotNamespace>/$(arg prefix)/sbot</robotNamespace>
+			<robotParam>/$(arg prefix)/robot_description</robotParam>
+		</plugin>
+	</gazebo>
+	
+	<xacro:property name="Link1_width" value="0.08"/>
+	<xacro:property name="Link1_height" value="0.1"/>
+	<xacro:property name="Link1_length" value="0.4"/>
+	<xacro:property name="Link1_mass" value="1"/>
+	
+	
+	<xacro:property name="Link2_width" value="0.08"/>
+	<xacro:property name="Link2_height" value="0.1"/>
+	<xacro:property name="Link2_length" value="0.4"/>
+	<xacro:property name="Link2_mass" value="1"/>
+		
+	<xacro:property name="Base_width" value="0.5"/>
+	<xacro:property name="Base_height" value="0.3"/>
+	<xacro:property name="Base_length" value="0.5"/>
+	<xacro:property name="Base_mass" value="100"/>
+	
+	<link name="World"/>
+	
+	<link name="Base">
+			<visual>
+				<geometry>
+					<box size="${Base_width} ${Base_length} ${Base_height}"/>
+				</geometry>
+				<origin xyz="0 0 ${Base_height/2}" rpy="0 0 0"/> 
+			</visual>
+			<collision>
+				<geometry>
+					<box size="${Base_width} ${Base_length} ${Base_height}"/>
+				</geometry>
+				<origin xyz="0 0 ${Base_height/2}" rpy="0 0 0"/> 
+			</collision>
+			<inertial>
+				<mass value = "${Base_mass}"/>
+				<inertia ixx="${0.5*Base_mass*(Base_length*Base_length + Base_height*Base_height)}"
+						iyy="${0.5*Base_mass*(Base_width*Base_width + Base_height*Base_height)}"
+						izz="${0.5*Base_mass*(Base_width*Base_width + Base_length*Base_length)}"
+						ixy="0" iyz="0" ixz="0" />
+			</inertial>
+	</link>
+	
+	<joint name="Fixed" type="fixed">                                                                                                                                                                                          <parent link="World"/>
+		<child link="Base"/>
+		<origin xyz="$(arg xR) $(arg yR) 0" rpy="0 0 $(arg orient)"/>
+	</joint>   
+		
+	
+	<xacro:macro name="linkConstructor" params="name width height length mass">
+		<link name="${name}">
+			<visual>
+				<geometry>
+					<box size="${length} ${height} ${width}"/>
+				</geometry>
+				<origin xyz="${length/2} 0 0" rpy="0 0 0"/> 
+			</visual>
+			<collision>
+				<geometry>
+					<box size="${length} ${height} ${width}"/>
+				</geometry>
+				<origin xyz="${length/2} 0 0" rpy="0 0 0"/> 
+			</collision>
+			<inertial>
+				<mass value = "${mass}"/>
+				<inertia ixx="${0.5*mass*(width*width + height*height)}"
+						iyy="${0.5*mass*(width*width + length*length)}"
+						izz="${0.5*mass*(height*height + length*length)}"
+						ixy="0" iyz="0" ixz="0" />
+			</inertial>
+		</link>
+		
+	</xacro:macro>
+	
+	<xacro:linkConstructor name="Link1" width="${Link1_width}" height="${Link1_height}" length="${Link1_length}" mass="${Link1_mass}" />
+	<xacro:linkConstructor name="Link2" width="${Link2_width}" height="${Link2_height}" length="${Link2_length}" mass="${Link2_mass}" />
+	
+	
+	<joint name="Joint1" type="continuous">
+		<parent link="Base"/>
+		<child link="Link1"/>
+		<axis xyz="0 0 1" />
+		<origin xyz="0 0 ${Base_height+Link1_height/2}" rpy="1.57 0 0" />
+	</joint>
+
+	<joint name="Joint2" type="continuous">
+		<parent link="Link1"/>
+		<child link="Link2"/>
+		<origin xyz="${Link1_length} 0 ${-(Link1_width + Link2_width)/2}" rpy="0 0 0"/>
+		<axis xyz="0 0 1" />
+	</joint>
+	
+	<transmission name="tran1">
+		<type>tranmission_interface/SimpleTransmission</type>
+		<joint name="Joint1">
+			<hardwareInterface>EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="motor1">
+			<hardwareInterface>EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="tran2">
+		<type>tranmission_interface/SimpleTransmission</type>
+		<joint name="Joint2">
+			<hardwareInterface>EffortJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="motor2">
+			<hardwareInterface>EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<gazebo reference="Link1">
+		<material>Gazebo/Blue</material>
+	</gazebo>
+	<gazebo reference="Link2">
+		<material>Gazebo/Orange</material>
+	</gazebo>
+</robot>
+
